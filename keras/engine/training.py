@@ -1217,7 +1217,8 @@ class Model(Container):
                     if callback_model.stop_training:
                         break
 
-                    if batch_index == len(batches) - 1 or (validation_rate is not None and batch_index % validation_rate == 0):
+                    if batch_index == len(batches) - 1 or (validation_rate is not None and \
+                                                           batch_index % validation_rate == 0):
                         if do_validation:
                             val_outs = self._test_loop(val_f, val_ins,
                                                        batch_size=batch_size,
@@ -1228,7 +1229,8 @@ class Model(Container):
                             for l, o in zip(out_labels, val_outs):
                                 if batch_index == len(batches) - 1:
                                     epoch_logs['val_' + l] = o
-                                epoch_logs.setdefault('custom_val_' + l, []).append(o)
+                                if validation_rate is not None:
+                                    epoch_logs.setdefault('custom_val_' + l, []).append(o)
             callbacks.on_epoch_end(epoch, epoch_logs)
             if callback_model.stop_training:
                 break
