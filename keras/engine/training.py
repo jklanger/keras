@@ -1187,8 +1187,7 @@ class Model(Container):
                     np.random.shuffle(index_array)
 
                 batches = _make_batches(num_train_samples, batch_size)
-                if validation_rate is None:
-                    validation_rate = len(batches) - 1
+                
                 for batch_index, (batch_start, batch_end) in enumerate(batches):
                     batch_ids = index_array[batch_start:batch_end]
                     try:
@@ -1218,7 +1217,7 @@ class Model(Container):
                     if callback_model.stop_training:
                         break
 
-                    if batch_index % validation_rate == 0 or batch_index == len(batches) - 1: # Last batch.
+                    if batch_index == len(batches) - 1 or (validation_rate is not None and batch_index % validation_rate == 0):
                         if do_validation:
                             val_outs = self._test_loop(val_f, val_ins,
                                                        batch_size=batch_size,
