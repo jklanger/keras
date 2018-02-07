@@ -849,6 +849,7 @@ class Sequential(Model):
             initial_epoch=0,
             steps_per_epoch=None,
             validation_steps=None,
+            validation_rate=None,
             **kwargs):
         """Trains the model for a fixed number of epochs (iterations on a dataset).
 
@@ -960,7 +961,8 @@ class Sequential(Model):
                               sample_weight=sample_weight,
                               initial_epoch=initial_epoch,
                               steps_per_epoch=steps_per_epoch,
-                              validation_steps=validation_steps)
+                              validation_steps=validation_steps,
+                              validation_rate=validation_rate)
 
     def evaluate(self, x=None, y=None,
                  batch_size=None,

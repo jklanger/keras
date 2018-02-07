@@ -1056,7 +1056,8 @@ class Model(Container):
                   epochs=100, verbose=1, callbacks=None,
                   val_f=None, val_ins=None, shuffle=True,
                   callback_metrics=None, initial_epoch=0,
-                  steps_per_epoch=None, validation_steps=None):
+                  steps_per_epoch=None, validation_steps=None,
+                  validation_rate=None):
         """Abstract fit function for `f(ins)`.
 
         Assume that f returns a list, labeled by out_labels.
@@ -1186,6 +1187,8 @@ class Model(Container):
                     np.random.shuffle(index_array)
 
                 batches = _make_batches(num_train_samples, batch_size)
+                if validation_rate is None:
+                    validation_rate = len(batches) - 1
                 for batch_index, (batch_start, batch_end) in enumerate(batches):
                     batch_ids = index_array[batch_start:batch_end]
                     try:
@@ -1215,7 +1218,7 @@ class Model(Container):
                     if callback_model.stop_training:
                         break
 
-                    if batch_index == len(batches) - 1:  # Last batch.
+                    if batch_index % validation_rate == 0 or batch_index == len(batches) - 1: # Last batch.
                         if do_validation:
                             val_outs = self._test_loop(val_f, val_ins,
                                                        batch_size=batch_size,
@@ -1224,7 +1227,9 @@ class Model(Container):
                                 val_outs = [val_outs]
                             # Same labels assumed.
                             for l, o in zip(out_labels, val_outs):
-                                epoch_logs['val_' + l] = o
+                                if batch_index == len(batches) - 1:
+                                    epoch_logs['val_' + l] = o
+                                epoch_logs.setdefault('custom_val_' + l, []).append(o)
             callbacks.on_epoch_end(epoch, epoch_logs)
             if callback_model.stop_training:
                 break
@@ -1483,6 +1488,7 @@ class Model(Container):
             initial_epoch=0,
             steps_per_epoch=None,
             validation_steps=None,
+            validation_rate=None,
             **kwargs):
         """Trains the model for a fixed number of epochs (iterations on a dataset).
 
@@ -1670,7 +1676,8 @@ class Model(Container):
                               callback_metrics=callback_metrics,
                               initial_epoch=initial_epoch,
                               steps_per_epoch=steps_per_epoch,
-                              validation_steps=validation_steps)
+                              validation_steps=validation_steps,
+                              validation_rate=validation_rate)
 
     def evaluate(self, x=None, y=None,
                  batch_size=None,
