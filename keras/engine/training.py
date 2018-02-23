@@ -1213,10 +1213,6 @@ class Model(Container):
                     for l, o in zip(out_labels, outs):
                         batch_logs[l] = o
 
-                    callbacks.on_batch_end(batch_index, batch_logs)
-                    if callback_model.stop_training:
-                        break
-
                     if batch_index == len(batches) - 1 or (validation_rate is not None and \
                                                            batch_index % validation_rate == 0):
                         if do_validation:
@@ -1231,10 +1227,16 @@ class Model(Container):
                                     epoch_logs['val_' + l] = o
                                 if validation_rate is not None:
                                     epoch_logs.setdefault('custom_val_' + l, []).append(o)
+                                    batch_logs.setdefault('custom_val_' + l, []).append(o)
 
                             for l, o in zip(out_labels, outs):
                                 if validation_rate is not None:
                                     epoch_logs.setdefault('custom_trn_' + l, []).append(o)
+                                    batch_logs.setdefault('custom_trn_' + l, []).append(o)
+                                        
+                    callbacks.on_batch_end(batch_index, batch_logs)
+                    if callback_model.stop_training:
+                        break
                                 
             callbacks.on_epoch_end(epoch, epoch_logs)
             if callback_model.stop_training:
