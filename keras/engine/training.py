@@ -1227,12 +1227,11 @@ class Model(Container):
                                     epoch_logs['val_' + l] = o
                                 if validation_rate is not None:
                                     epoch_logs.setdefault('custom_val_' + l, []).append(o)
-                                    batch_logs.setdefault('custom_val_' + l, []).append(o)
+                                    batch_logs['custom_val_' + l] = o
 
                             for l, o in zip(out_labels, outs):
                                 if validation_rate is not None:
                                     epoch_logs.setdefault('custom_trn_' + l, []).append(o)
-                                    batch_logs.setdefault('custom_trn_' + l, []).append(o)
                                         
                     callbacks.on_batch_end(batch_index, batch_logs)
                     if callback_model.stop_training:
